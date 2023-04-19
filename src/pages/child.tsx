@@ -8,11 +8,7 @@ export default function ChildPage() {
     <Grid gap={4} p={4}>
       <Heading>Child</Heading>
 
-      <Text>
-        {message?.message
-          ? String(message.message)
-          : "メッセージを待っています"}
-      </Text>
+      <Text>{message?.payload || "メッセージを待機中です"}</Text>
     </Grid>
   );
 }

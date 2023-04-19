@@ -1,37 +1,33 @@
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
-type Message = {
-  message: string;
-};
+const IDENTIFIER = "app";
 
-type MessageWithIdentifier = Message & {
-  identifier: "app";
-};
+const messageSchema = z.object({
+  identifier: z.literal(IDENTIFIER),
+  payload: z.string(),
+});
+
+type Message = z.infer<typeof messageSchema>;
 
 const isAppMessageEvent = (
-  event: MessageEvent<MessageWithIdentifier | unknown>
+  event: MessageEvent<Message | unknown>
 ): event is MessageEvent<Message> => {
-  const isSameOrigin = event.origin === window.location.origin;
-
-  const { data: message } = event;
-
-  const isAppMessage =
-    typeof message === "object" &&
-    message !== null &&
-    "identifier" in message &&
-    (message as MessageWithIdentifier).identifier === "app";
-
-  return isSameOrigin && isAppMessage;
+  const { success } = messageSchema.safeParse(event.data);
+  return success;
 };
 
-const typedPostMessage = (target: Window, message: MessageWithIdentifier) => {
+const typedPostMessage = (target: Window, message: Message) => {
   target.postMessage(message, "*");
 };
 
 export const useWindowMessageSender = () => {
-  const sendMessage = (target: Window, message: Message) => {
+  const sendMessage = (
+    target: Window,
+    message: Omit<Message, "identifier">
+  ) => {
     typedPostMessage(target, {
-      identifier: "app",
+      identifier: IDENTIFIER,
       ...message,
     });
   };

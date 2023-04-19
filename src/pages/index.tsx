@@ -15,7 +15,7 @@ export default function Home() {
     }
 
     sendMessage(childPage, {
-      message: value,
+      payload: value,
     });
 
     setValue("");
